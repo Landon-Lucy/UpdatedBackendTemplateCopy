@@ -18,7 +18,7 @@ builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<AuthHttpMessageHandler>();
 
 // ============================================================
-// HTTP CLIENT CONFIGURATION 
+// HTTP CLIENT CONFIGURATION
 // ============================================================
 builder.Services.AddScoped(sp =>
 {

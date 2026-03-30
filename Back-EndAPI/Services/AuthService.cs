@@ -5,6 +5,8 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using System.Linq;
+using ClassLibrary.Authorization;
 
 namespace Back_EndAPI.Services;
 
@@ -12,6 +14,20 @@ public class AuthService
 {
     private readonly string _key = "THIS_IS_MY_SECRET_KEY_1234567890";
     private readonly AppDbContext _context;
+
+    // In-memory mock users for demo/testing
+    private class MockUser
+    {
+        public string Username { get; set; }
+        public string Password { get; set; }
+        public string[] Permissions { get; set; }
+    }
+
+    private readonly List<MockUser> _mockUsers = new()
+    {
+        new MockUser { Username = "alice", Password = "password1", Permissions = new[] { Permissions.CharacterCreate, Permissions.CharacterRead, Permissions.UsersRead } },
+        new MockUser { Username = "bob", Password = "password2", Permissions = new[] { Permissions.CharacterRead } }
+    };
 
     public AuthService(AppDbContext context)
     {
@@ -28,23 +44,29 @@ public class AuthService
 
     public string? LoginSimple(string username, string password)
     {
-        if (username != "Admin" || password != "password")
+        // Validate against in-memory mock users
+        var user = _mockUsers.FirstOrDefault(u => u.Username == username && u.Password == password);
+        if (user == null)
             return null;
 
-        return GenerateTokenSimple(username);
+        return GenerateTokenSimple(user);
     }
 
-    private string GenerateTokenSimple(string username)
+    private string GenerateTokenSimple(MockUser user)
     {
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_key));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
         var claims = new List<Claim>
         {
-            new Claim(ClaimTypes.Name, username),
-            new Claim(ClaimTypes.Role, "Admin"),
-            new Claim("permission", "character.create")
+            new Claim(ClaimTypes.Name, user.Username)
         };
+
+        // Add one claim per permission (permission names are strings like "users.create")
+        foreach (var p in user.Permissions)
+        {
+            claims.Add(new Claim("permission", p));
+        }
 
         var token = new JwtSecurityToken(
             claims: claims,

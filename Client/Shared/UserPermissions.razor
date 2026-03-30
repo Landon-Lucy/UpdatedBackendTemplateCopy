@@ -1,0 +1,26 @@
+@using Microsoft.AspNetCore.Components
+@inject Client.Services.TokenAuthenticationStateProvider AuthStateProvider
+
+<div>
+    <div><strong>User:</strong> @username</div>
+    <div>
+        @foreach (var perm in AvailableRoles)
+        {
+            <button disabled="@(!AuthStateProvider.HasPermission(perm))" style="margin-right:6px;">@perm</button>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public List<string> AvailableRoles { get; set; } = new List<string>();
+
+    private string username = "(not logged in)";
+
+    protected override async Task OnInitializedAsync()
+    {
+        var state = await AuthStateProvider.GetAuthenticationStateAsync();
+        username = state.User.Identity?.Name ?? "(not logged in)";
+    }
+
+}

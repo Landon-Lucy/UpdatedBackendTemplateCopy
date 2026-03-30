@@ -38,7 +38,9 @@ builder.Services.AddAuthentication(options =>
 //        policy.RequireClaim("permission", "users.create"));
 //});
 
-// TO THIS:
+// Register authorization and a custom policy provider that maps policy names to
+// a requirement for a "permission" claim with the same name.
+builder.Services.AddAuthorization();
 builder.Services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
 
 

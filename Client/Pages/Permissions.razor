@@ -1,0 +1,14 @@
+@page "/permissions"
+@using Client.Shared
+
+<UserPermissions AvailableRoles="availableRoles" />
+
+@code {
+    private List<string> availableRoles = new()
+    {
+        Permissions.UsersRead,
+        Permissions.UsersCreate,
+        Permissions.CharacterRead,
+        Permissions.CharacterCreate
+    };
+}
