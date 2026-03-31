@@ -47,10 +47,10 @@ namespace Client.Services
             _http.DefaultRequestHeaders.Authorization = null;
         }
 
-        // Returns cached token (set after Login or InitializeAsync)
+        // Returns cached token
         public string? GetToken() => _token;
 
-        // Call this at app startup to restore token from localStorage if present
+        // at startup to restore token from localStorage if present
         public async Task InitializeAsync()
         {
             var t = await _js.InvokeAsync<string>("localStorage.getItem", TokenKey);

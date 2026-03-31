@@ -2,6 +2,7 @@
 using Back_EndAPI.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -15,7 +16,7 @@ public class AuthService
     private readonly string _key = "THIS_IS_MY_SECRET_KEY_1234567890";
     private readonly AppDbContext _context;
 
-    // In-memory mock users for demo/testing
+    // mock users for demo/testing
     private class MockUser
     {
         public string Username { get; set; }
@@ -34,36 +35,32 @@ public class AuthService
         _context = context;
     }
 
-    // =========================================
-    // SIMPLE VERSION (TEACHING / DEMO ONLY)
-    // =========================================
+    // mock login no DB
     public string? Login(string username, string password)
-    {
-        return LoginSimple(username, password);
-    }
-
-    public string? LoginSimple(string username, string password)
     {
         // Validate against in-memory mock users
         var user = _mockUsers.FirstOrDefault(u => u.Username == username && u.Password == password);
         if (user == null)
             return null;
 
-        return GenerateTokenSimple(user);
+        return GenerateTokenFromPermissions(user.Username, user.Permissions);
     }
 
-    private string GenerateTokenSimple(MockUser user)
+    // Build a JWT
+    private string GenerateTokenFromPermissions(string username, string[] permissions)
     {
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_key));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
         var claims = new List<Claim>
         {
-            new Claim(ClaimTypes.Name, user.Username)
+            new Claim(ClaimTypes.Name, username),
+            // identifier for the mock user
+            new Claim(ClaimTypes.NameIdentifier, Guid.NewGuid().ToString())
         };
 
-        // Add one claim per permission (permission names are strings like "users.create")
-        foreach (var p in user.Permissions)
+        // Add one claim per permission (like "users.create"
+        foreach (var p in permissions)
         {
             claims.Add(new Claim("permission", p));
         }

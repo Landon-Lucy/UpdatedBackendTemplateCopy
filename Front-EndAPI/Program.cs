@@ -13,8 +13,8 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 // ============================================================
 builder.Services.AddScoped<CustomAuthStateProvider>();
 builder.Services.AddScoped<AuthenticationStateProvider>(provider =>
-    provider.GetRequiredService<CustomAuthStateProvider>());
-builder.Services.AddScoped<AuthService>();
+provider.GetRequiredService<CustomAuthStateProvider>());
+ builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<AuthHttpMessageHandler>();
 
 // ============================================================
